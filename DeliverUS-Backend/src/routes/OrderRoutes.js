@@ -1,0 +1,80 @@
+import OrderController from '../controllers/OrderController.js'
+import { hasRole, isLoggedIn } from '../middlewares/AuthMiddleware.js'
+import { checkEntityExists } from '../middlewares/EntityMiddleware.js'
+import * as OrderMiddleware from '../middlewares/OrderMiddleware.js'
+import * as OrderValidation from '../controllers/validation/OrderValidation.js'
+import { handleValidation } from '../middlewares/ValidationHandlingMiddleware.js'
+import { Order } from '../models/models.js'
+
+const loadFileRoutes = function (app) {
+  // TODO: Include routes for:
+
+  app.route('/orders')
+    .get( // 1. Retrieving orders from current logged-in customer
+      isLoggedIn,
+      hasRole('customer'),
+      OrderMiddleware.checkOrderVisible,
+      OrderController.indexCustomer)
+    .post(
+      isLoggedIn,
+      hasRole('customer'), // 2. Creating a new order (only customers can create new orders)
+      OrderMiddleware.checkRestaurantExists,
+      OrderValidation.create,
+      handleValidation,
+      OrderController.create)
+
+  app.route('/orders/:orderId/confirm')
+    .patch(
+      isLoggedIn,
+      hasRole('owner'),
+      checkEntityExists(Order, 'orderId'),
+      OrderMiddleware.checkOrderOwnership,
+      OrderMiddleware.checkOrderIsPending,
+      OrderController.confirm)
+  app.route('/orders/:orderId/send')
+    .patch(
+      isLoggedIn,
+      hasRole('owner'),
+      checkEntityExists(Order, 'orderId'),
+      OrderMiddleware.checkOrderOwnership,
+      OrderMiddleware.checkOrderCanBeSent,
+      OrderController.send)
+
+  app.route('/orders/:orderId/deliver')
+    .patch(
+      isLoggedIn,
+      hasRole('owner'),
+      checkEntityExists(Order, 'orderId'),
+      OrderMiddleware.checkOrderOwnership,
+      OrderMiddleware.checkOrderCanBeDelivered,
+      OrderController.deliver)
+
+  // TODO: Include routes for:
+
+  app.route('/orders/:orderId')
+    .get(
+      isLoggedIn,
+      checkEntityExists(Order, 'orderId'),
+      OrderMiddleware.checkOrderVisible,
+      OrderController.show)
+    .put(
+      isLoggedIn,
+      hasRole('customer'),
+      checkEntityExists(Order, 'orderId'),
+      OrderMiddleware.checkOrderIsPending,
+      OrderMiddleware.checkRestaurantExists,
+      OrderMiddleware.checkOrderVisible,
+      OrderValidation.update,
+      handleValidation,
+      OrderController.update // 3. Editing order (only customers can edit their own orders)
+    )
+    .delete(
+      isLoggedIn,
+      hasRole('customer'),
+      checkEntityExists(Order, 'orderId'),
+      OrderMiddleware.checkOrderIsPending,
+      OrderMiddleware.checkOrderVisible, // 4. Remove order (only customers can remove their own orders)
+      OrderController.destroy)
+}
+
+export default loadFileRoutes
