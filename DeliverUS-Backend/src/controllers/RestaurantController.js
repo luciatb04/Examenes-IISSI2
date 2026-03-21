@@ -1,4 +1,5 @@
-import { Restaurant, Product, RestaurantCategory, ProductCategory } from '../models/models.js'
+import { Restaurant, Product, RestaurantCategory, ProductCategory, Schedule } from '../models/models.js'
+import { Op } from 'sequelize'
 
 const index = async function (req, res) {
   try {
@@ -14,6 +15,44 @@ const index = async function (req, res) {
       }
     )
     res.json(restaurants)
+  } catch (err) {
+    res.status(500).send(err)
+  }
+}
+
+const showWithActiveProducts = async function (req, res) {
+  try {
+    const now = new Date().toTimeString().split(' ')[0] // 'HH:mm:ss'
+
+    const restaurant = await Restaurant.findByPk(req.params.restaurantId, {
+      attributes: { exclude: ['userId'] },
+      include: [
+        {
+          model: Product,
+          as: 'products',
+          required: false,
+          include: [
+            { model: ProductCategory, as: 'productCategory' },
+            {
+              model: Schedule,
+              as: 'schedule',
+              required: true,
+              where: {
+                startTime: { [Op.lte]: now },
+                endTime: { [Op.gt]: now }
+              }
+            }
+          ]
+        },
+        {
+          model: RestaurantCategory,
+          as: 'restaurantCategory'
+        }
+      ],
+      order: [[{ model: Product, as: 'products' }, 'order', 'ASC']]
+    })
+
+    res.json(restaurant)
   } catch (err) {
     res.status(500).send(err)
   }
@@ -101,6 +140,7 @@ const RestaurantController = {
   create,
   show,
   update,
-  destroy
+  destroy,
+  showWithActiveProducts
 }
 export default RestaurantController

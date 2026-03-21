@@ -1,5 +1,5 @@
 import { check } from 'express-validator'
-import { Restaurant } from '../../models/models.js'
+import { Product, Restaurant, Schedule } from '../../models/models.js'
 import { checkFileIsImage, checkFileMaxSize } from './FileValidationHelper.js'
 
 const maxFileSize = 2000000 // around 2Mb
@@ -14,6 +14,31 @@ const checkRestaurantExists = async (value, { req }) => {
     return Promise.reject(new Error(err))
   }
 }
+
+const checkScheduleBelongsToRestaurantOnCreate = async (value, { req }) => {
+  if (!value) return Promise.resolve() // Permitir scheduleId vacío
+  const schedule = await Schedule.findByPk(value)
+  if (!schedule) {
+    return Promise.reject(new Error('The scheduleId does not exist.'))
+  }
+  if (schedule.restaurantId !== req.body.restaurantId) {
+    return Promise.reject(new Error('The scheduleId does not belong to the given restaurantId.'))
+  }
+  return Promise.resolve()
+}
+
+const checkScheduleBelongsToRestaurantOnUpdate = async (value, { req }) => {
+  if (!value) return Promise.resolve() // Permitir scheduleId vacío
+  const schedule = await Schedule.findByPk(value)
+  if (!schedule) {
+    return Promise.reject(new Error('The scheduleId does not exist.'))
+  }
+  if (schedule.restaurantId !== req.body.restaurantId) {
+    return Promise.reject(new Error('The scheduleId does not belong to the given restaurantId.'))
+  }
+  return Promise.resolve()
+}
+
 const create = [
   check('name').exists().isString().isLength({ min: 1, max: 255 }).trim(),
   check('description').optional({ checkNull: true, checkFalsy: true }).isString().isLength({ min: 1 }).trim(),
@@ -28,7 +53,9 @@ const create = [
   }).withMessage('Please upload an image with format (jpeg, png).'),
   check('image').custom((value, { req }) => {
     return checkFileMaxSize(req, 'image', maxFileSize)
-  }).withMessage('Maximum file size of ' + maxFileSize / 1000000 + 'MB')
+  }).withMessage('Maximum file size of ' + maxFileSize / 1000000 + 'MB'),
+  check('scheduleId').optional({ nullable: true, checkFalsy: true }).isInt({ min: 1 }).toInt().custom(checkScheduleBelongsToRestaurantOnCreate)
+
 ]
 
 const update = [
@@ -45,7 +72,8 @@ const update = [
   check('image').custom((value, { req }) => {
     return checkFileMaxSize(req, 'image', maxFileSize)
   }).withMessage('Maximum file size of ' + maxFileSize / 1000000 + 'MB'),
-  check('restaurantId').not().exists()
+  check('restaurantId').not().exists(),
+  check('scheduleId').optional({ nullable: true, checkFalsy: true }).isInt({ min: 1 }).toInt().custom(checkScheduleBelongsToRestaurantOnUpdate)
 ]
 
 export { create, update }

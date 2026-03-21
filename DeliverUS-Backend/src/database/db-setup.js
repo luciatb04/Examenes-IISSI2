@@ -13,8 +13,10 @@
 import { exec } from 'child_process'
 import { promisify } from 'util'
 import path from 'path'
+import fs from 'fs/promises'
 import { fileURLToPath } from 'url'
 import dotenv from 'dotenv'
+import mariadb from 'mariadb'
 
 // Load environment variables
 dotenv.config({ path: path.join(path.dirname(fileURLToPath(import.meta.url)), '../../.env') })
@@ -61,19 +63,34 @@ async function dbSetup () {
     // Step 1.5: Clean orphaned migrations from SequelizeMeta before undoing
     console.log('\n1️⃣.5️⃣  Limpiando migraciones huérfanas del registro...')
     try {
-      // Get all migrations in filesystem
-      const migrationsOutput = await execAsync('ls -1 src/database/migrations/*.js 2>/dev/null | xargs -I {} basename {} || echo ""')
-      const migrationsInFS = migrationsOutput.stdout
-        .trim()
-        .split('\n')
-        .filter(f => f && !f.startsWith('config'))
+      // Cross-platform migration discovery from filesystem.
+      const migrationsDir = path.join(path.dirname(fileURLToPath(import.meta.url)), 'migrations')
+      const migrationsInFS = (await fs.readdir(migrationsDir))
+        .filter(f => f.endsWith('.js') && !f.startsWith('config'))
 
-      // Get all migrations in database
-      const dbMigrationsOutput = await execAsync(`mysql -h ${dbHost} -P ${dbPort} -u ${dbUser} -p'${dbPass}' ${dbName} -e "SELECT name FROM SequelizeMeta" --batch --skip-column-names 2>/dev/null || echo ""`)
-      const dbMigrations = dbMigrationsOutput.stdout
-        .trim()
-        .split('\n')
-        .filter(f => f)
+      // Query SequelizeMeta with mariadb client to keep it stable across platforms.
+      const connection = await mariadb.createConnection({
+        user: dbUser,
+        password: dbPass,
+        database: dbName,
+        host: dbHost,
+        port: Number(dbPort),
+        multipleStatements: false
+      })
+
+      let dbMigrations = []
+      try {
+        const rows = await connection.query('SELECT name FROM SequelizeMeta')
+        dbMigrations = rows.map(row => row.name)
+      } catch (queryErr) {
+        if (queryErr.message && queryErr.message.includes('SequelizeMeta')) {
+          console.log('   ✅ Tabla SequelizeMeta aún no existe')
+          await connection.end()
+          dbMigrations = []
+        } else {
+          throw queryErr
+        }
+      }
 
       // Find orphaned migrations (in DB but not in filesystem)
       const orphanedMigrations = dbMigrations.filter(dbMig => !migrationsInFS.includes(dbMig))
@@ -81,13 +98,14 @@ async function dbSetup () {
       if (orphanedMigrations.length > 0) {
         console.log(`   🗑️  Encontradas ${orphanedMigrations.length} migraciones huérfanas`)
         for (const orphan of orphanedMigrations) {
-          const deleteCmd = `mysql -h ${dbHost} -P ${dbPort} -u ${dbUser} -p'${dbPass}' ${dbName} -e "DELETE FROM SequelizeMeta WHERE name = '${orphan}'"`
-          await execAsync(deleteCmd)
+          await connection.query('DELETE FROM SequelizeMeta WHERE name = ?', [orphan])
           console.log(`   ✅ Eliminada: ${orphan}`)
         }
       } else {
         console.log('   ✅ Sin migraciones huérfanas')
       }
+
+      await connection.end()
     } catch (cleanErr) {
       console.log('   ℹ️  No se pudo verificar migraciones huérfanas, continuando...')
     }
