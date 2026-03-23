@@ -11,6 +11,12 @@ module.exports = {
         allowNull: false,
         type: Sequelize.STRING
       },
+      // TODO exam: Foreign key for restaurant
+      restaurantId: {
+        type: Sequelize.INTEGER,
+        allowNull: false
+      },
+      // TODO exam: END
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE,

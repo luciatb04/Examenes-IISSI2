@@ -5,6 +5,11 @@ const ownerCredentials = {
   password: 'secret'
 }
 
+const owner2Credentials = {
+  email: 'owner2@owner.com',
+  password: 'secret'
+}
+
 const noEmailOwnerCredentials = {
   password: 'secret'
 }
@@ -83,4 +88,4 @@ const generateFakeUser = async (name) => {
   return { firstName, lastName, email, password, phone, avatar, address, postalCode, userType, createdAt, updatedAt }
 }
 
-export { ownerCredentials, customerCredentials, noEmailCustomerCredentials, noEmailOwnerCredentials, invalidCredentials, invalidRestaurant, bodeguitaRestaurant, paellaProduct, cervezaProduct, review, generateFakeUser }
+export { ownerCredentials, owner2Credentials, customerCredentials, noEmailCustomerCredentials, noEmailOwnerCredentials, invalidCredentials, invalidRestaurant, bodeguitaRestaurant, paellaProduct, cervezaProduct, review, generateFakeUser }

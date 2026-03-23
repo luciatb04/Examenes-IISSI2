@@ -1,7 +1,7 @@
 import request from 'supertest'
 import { getApp } from './testApp'
 import { bodeguitaRestaurant, generateFakeUser } from './testData'
-let firstRestaurantOfOwner
+let firstRestaurantOfOwner, saveOwner
 
 const createRestaurant = async (owner) => {
   if (!owner) { owner = (await request(await getApp()).post('/users/registerOwner').send(await generateFakeUser())).body }
@@ -11,7 +11,8 @@ const createRestaurant = async (owner) => {
 }
 
 const getFirstRestaurantOfOwner = async (owner) => {
-  if (firstRestaurantOfOwner) return firstRestaurantOfOwner
+  if (firstRestaurantOfOwner && saveOwner && saveOwner.id === owner.id) return firstRestaurantOfOwner
+  saveOwner = owner
   firstRestaurantOfOwner = (await request(await getApp()).get('/users/myRestaurants').set('Authorization', `Bearer ${owner.token}`).send()).body[0]
   return firstRestaurantOfOwner
 }

@@ -12,7 +12,14 @@ const loadModel = (sequelize, DataTypes) => {
     }
   }
   ProductCategory.init({
-    name: DataTypes.STRING,
+    name: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
+    restaurantId: {
+      allowNull: false,
+      type: DataTypes.INTEGER
+    },
     createdAt: {
       allowNull: false,
       type: DataTypes.DATE,

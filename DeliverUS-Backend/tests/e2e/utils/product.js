@@ -11,7 +11,7 @@ const createProduct = async (owner, restaurant, productData) => {
 
 const getRandomProductCategory = async () => {
   if (!productCategories) {
-    productCategories = (await request(await getApp()).get('/productCategories').send()).body
+    productCategories = (await request(await getApp()).get('/productCategories/restaurants/1').send()).body
   }
   return productCategories[Math.floor(Math.random() * productCategories.length)]
 }
@@ -44,6 +44,18 @@ const getNewUnavailablePaellaProductData = async (restaurant) => {
   return newProduct
 }
 
+const getNewProductCategory = async (restaurant) => {
+  return {
+    name: 'New Category ' + Math.random().toString(36).substring(7),
+    restaurantId: restaurant.id
+  }
+}
+
+async function checkProductCategoryEquals (createdProductCategory, productCategory) {
+  expect(createdProductCategory.name).toBe(productCategory.name)
+  expect(createdProductCategory.restaurantId).toBe(productCategory.restaurantId)
+}
+
 const getFirstProductFromRestaurant = async (restaurant) => {
   return (await getProductsFromRestaurant(restaurant, 1))[0]
 }
@@ -67,4 +79,4 @@ const productHasCorrectAvgStars = (product) => {
   }
 }
 
-export { createProduct, getNewPaellaProductData, getNewCervezaProductData, getFirstProductFromRestaurant, getProductsFromRestaurant, getProductAlreadyOrdered, getNewUnavailablePaellaProductData, productHasCorrectAvgStars }
+export { createProduct, getNewProductCategory, checkProductCategoryEquals, getNewPaellaProductData, getNewCervezaProductData, getFirstProductFromRestaurant, getProductsFromRestaurant, getProductAlreadyOrdered, getNewUnavailablePaellaProductData, productHasCorrectAvgStars }

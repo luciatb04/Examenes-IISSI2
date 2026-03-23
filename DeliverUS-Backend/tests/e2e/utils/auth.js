@@ -1,8 +1,8 @@
 import request from 'supertest'
-import { ownerCredentials, customerCredentials, generateFakeUser } from './testData'
+import { ownerCredentials, customerCredentials, generateFakeUser, owner2Credentials } from './testData'
 import { getApp } from './testApp'
 
-let loggedInOwner, loggedInCustomer
+let loggedInOwner, loggedInCustomer, loggedInOwner2
 
 const getNewLoggedInOwner = async () => {
   const fakeOwner = await generateFakeUser()
@@ -15,6 +15,13 @@ const getLoggedInOwner = async () => {
   const response = await request(await getApp()).post('/users/loginOwner').send(ownerCredentials)
   loggedInOwner = response.body
   return loggedInOwner
+}
+
+const getLoggedInOwner2 = async () => {
+  if (loggedInOwner2) return loggedInOwner2
+  const response = await request(await getApp()).post('/users/loginOwner').send(owner2Credentials)
+  loggedInOwner2 = response.body
+  return loggedInOwner2
 }
 
 const getLoggedInCustomer = async () => {
@@ -31,4 +38,4 @@ const getNewLoggedInCustomer = async (name) => {
   return getLoggedInCustomer
 }
 
-export { getLoggedInOwner, getNewLoggedInOwner, getLoggedInCustomer, getNewLoggedInCustomer }
+export { getLoggedInOwner, getLoggedInOwner2, getNewLoggedInOwner, getLoggedInCustomer, getNewLoggedInCustomer }
