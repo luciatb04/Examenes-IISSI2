@@ -13,6 +13,7 @@ const loadModel = (sequelize, DataTypes) => {
       Restaurant.belongsTo(models.RestaurantCategory, { foreignKey: 'restaurantCategoryId', as: 'restaurantCategory' })
       Restaurant.belongsTo(models.User, { foreignKey: 'userId', as: 'user' })
       Restaurant.hasMany(models.Product, { foreignKey: 'restaurantId', as: 'products' })
+      Restaurant.hasMany(models.Performance, { foreignKey: 'restaurantId', as: 'performances' })
       Restaurant.hasMany(models.Order, { foreignKey: 'restaurantId', as: 'orders' })
     }
 
