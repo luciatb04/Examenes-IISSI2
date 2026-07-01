@@ -13,7 +13,7 @@ module.exports = defineConfig([
       prettier: prettierPlugin
     },
     rules: {
-      'prettier/prettier': 'error',
+      'prettier/prettier': ['error', { endOfLine: 'auto' }],
       'import/no-unresolved': ['error', { ignore: ['^@env$'] }],
       'react/prop-types': 'off',
       'react-hooks/exhaustive-deps': 'off'
