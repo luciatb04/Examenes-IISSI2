@@ -1,6 +1,24 @@
 import { check } from 'express-validator'
+import { Restaurant } from '../../models/models.js'
+
 import { checkFileIsImage, checkFileMaxSize } from './FileValidationHelper.js'
 const maxFileSize = 2000000 // around 2Mb
+const checkNoMoreThanOnePromoted = async (value, { req }) => {
+  if (req.body.promoted !== true) {
+    return Promise.resolve()
+  }
+
+  const ownerId = req.user.id
+  const restaurantAlreadyPromoted = await Restaurant.findOne({
+    where: { promoted: true, userId: ownerId }
+  })
+
+  if (restaurantAlreadyPromoted) {
+    return Promise.reject(new Error('You can only have one promoted restaurant at a time.'))
+  }
+
+  return Promise.resolve()
+}
 
 const create = [
   check('name').exists().isString().isLength({ min: 1, max: 255 }).trim(),
@@ -8,6 +26,8 @@ const create = [
   check('address').exists().isString().isLength({ min: 1, max: 255 }).trim(),
   check('postalCode').exists().isString().isLength({ min: 1, max: 255 }),
   check('url').optional({ nullable: true, checkFalsy: true }).isString().isURL().trim(),
+  check('promoted').optional().isBoolean().toBoolean(),
+  check('promoted').custom(checkNoMoreThanOnePromoted),
   check('shippingCosts').exists().isFloat({ min: 0 }).toFloat(),
   check('email').optional({ nullable: true, checkFalsy: true }).isString().isEmail().trim(),
   check('phone').optional({ nullable: true, checkFalsy: true }).isString().isLength({ min: 1, max: 255 }).trim(),

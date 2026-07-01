@@ -1,7 +1,6 @@
 import * as UserValidation from '../controllers/validation/UserValidation.js'
 import UserController from '../controllers/UserController.js'
 import { User } from '../models/models.js'
-import RestaurantController from '../controllers/RestaurantController.js'
 import { handleValidation } from '../middlewares/ValidationHandlingMiddleware.js'
 import { isLoggedIn, hasRole } from '../middlewares/AuthMiddleware.js'
 import { checkEntityExists } from '../middlewares/EntityMiddleware.js'
@@ -46,7 +45,7 @@ const loadFileRoutes = function (app) {
     .get(
       isLoggedIn,
       hasRole('owner'),
-      RestaurantController.indexOwner)
+      UserController.indexOwnerRestaurants)
   app.route('/users/:userId')
     .get(
       checkEntityExists(User, 'userId'),

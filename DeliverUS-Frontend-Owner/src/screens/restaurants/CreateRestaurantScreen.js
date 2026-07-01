@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native'
+import { Pressable, ScrollView, StyleSheet, View, Switch } from 'react-native'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 import * as yup from 'yup'
 import DropDownPicker from 'react-native-dropdown-picker'
@@ -137,6 +137,21 @@ export default function CreateRestaurantScreen({ navigation }) {
                 image={values.logo}
                 defaultImage={restaurantLogo}
                 onImagePicked={result => setFieldValue('logo', result)}
+              />
+              <TextRegular>Restaurant promoted?</TextRegular>
+
+              <Switch
+                trackColor={{
+                  false: GlobalStyles.brandSecondary,
+                  true: GlobalStyles.brandPrimary
+                }}
+                thumbColor={
+                  values.availability ? GlobalStyles.brandSecondary : '#f4f3f4'
+                }
+                // onValueChange={toggleSwitch}
+                value={values.promoted}
+                style={styles.switch}
+                onValueChange={value => setFieldValue('promoted', value)}
               />
 
               <ImagePicker

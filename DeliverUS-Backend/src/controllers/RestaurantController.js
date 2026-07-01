@@ -10,7 +10,8 @@ const index = async function (req, res) {
         model: RestaurantCategory,
         as: 'restaurantCategory'
       },
-        order: [[{ model: RestaurantCategory, as: 'restaurantCategory' }, 'name', 'ASC']]
+        // se cambia el orden de los restaurantes para que los que esten promocionados aparezcan primero
+        order: [[{ model: RestaurantCategory, as: 'restaurantCategory' }, 'promoted', 'ASC']]
       }
     )
     res.json(restaurants)
@@ -28,7 +29,8 @@ const indexOwner = async function (req, res) {
         include: [{
           model: RestaurantCategory,
           as: 'restaurantCategory'
-        }]
+        }],
+        order: [['promoted', 'DESC'], ['id', 'ASC']]
       })
     res.json(restaurants)
   } catch (err) {
@@ -80,12 +82,30 @@ const update = async function (req, res) {
   }
 }
 
+const promote = async function (req, res) {
+  try {
+    const restaurant = await Restaurant.findByPk(req.params.restaurantId)
+    const ownerId = req.user.id
+    const restaurantAlreadyPromoted = await Restaurant.findOne({ where: { promoted: true, userId: ownerId } })
+    if (restaurantAlreadyPromoted && restaurantAlreadyPromoted.id !== restaurant.id) {
+      restaurantAlreadyPromoted.promoted = false
+      await restaurantAlreadyPromoted.save()
+    }
+
+    restaurant.promoted = true
+    await restaurant.save()
+    res.json(restaurant)
+  } catch (err) {
+    res.status(500).send(err)
+  }
+}
+
 const destroy = async function (req, res) {
   try {
     const result = await Restaurant.destroy({ where: { id: req.params.restaurantId } })
     let message = ''
     if (result === 1) {
-      message = 'Sucessfuly deleted restaurant id.' + req.params.restaurantId
+      message = 'Successfully deleted restaurant id.' + req.params.restaurantId
     } else {
       message = 'Could not delete restaurant.'
     }
@@ -101,6 +121,7 @@ const RestaurantController = {
   create,
   show,
   update,
-  destroy
+  destroy,
+  promote
 }
 export default RestaurantController

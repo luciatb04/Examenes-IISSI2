@@ -46,6 +46,10 @@ module.exports = {
       heroImage: {
         type: Sequelize.STRING
       },
+      promoted: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false
+      },
       status: {
         type: Sequelize.ENUM,
         values: [

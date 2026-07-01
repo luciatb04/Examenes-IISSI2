@@ -12,6 +12,19 @@ const indexWithRestaurants = async (req, res) => {
   }
 }
 
+const indexOwnerRestaurants = async (req, res) => {
+  try {
+    const restaurants = await Restaurant.findAll({
+      attributes: { exclude: ['userId'] },
+      where: { userId: req.user.id },
+      order: [['promoted', 'DESC'], ['id', 'ASC']]
+    })
+    res.json(restaurants)
+  } catch (err) {
+    res.status(500).send(err)
+  }
+}
+
 const registerCustomer = async (req, res) => {
   await _register(req, res, 'customer')
 }
@@ -145,6 +158,7 @@ const _updateExpirationToken = async (user) => {
 
 const UserController = {
   indexWithRestaurants,
+  indexOwnerRestaurants,
   registerCustomer,
   registerOwner,
   findByToken,
