@@ -1,6 +1,7 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import React from 'react'
 import CreateProductScreen from './CreateProductScreen'
+import CreatePerformanceScreen from './CreatePerformanceScreen'
 import CreateRestaurantScreen from './CreateRestaurantScreen'
 import EditProductScreen from './EditProductScreen'
 import EditRestaurantScreen from './EditRestaurantScreen'
@@ -24,6 +25,13 @@ export default function RestaurantsStack() {
         component={RestaurantDetailScreen}
         options={{
           title: 'Restaurant Detail'
+        }}
+      />
+      <Stack.Screen
+        name="CreatePerformanceScreen"
+        component={CreatePerformanceScreen}
+        options={{
+          title: 'Create Performance'
         }}
       />
       <Stack.Screen

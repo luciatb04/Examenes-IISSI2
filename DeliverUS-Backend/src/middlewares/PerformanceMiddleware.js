@@ -3,7 +3,7 @@ import { Restaurant, Order } from '../models/models.js'
 
 const checkPerformanceRestaurantOwnership = async (req, res, next) => {
   try {
-    const restaurant = await Restaurant.findByPk(req.params.restaurantId)
+    const restaurant = await Restaurant.findByPk(req.body.restaurantId)
     if (req.user.id === restaurant.userId) {
       return next()
     }

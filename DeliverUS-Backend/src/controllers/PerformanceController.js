@@ -2,7 +2,6 @@
 
 const create = async function (req, res) {
   const newPerformance = Performance.build(req.body)
-  newPerformance.restaurantId = req.restaurant.id // usuario actualmente autenticado
   try {
     const performance = await newPerformance.save()
     res.json(performance)

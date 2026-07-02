@@ -46,6 +46,24 @@ export default function RestaurantsScreen({ navigation, route }) {
             </TextSemiBold>
           </TextSemiBold>
         )}
+        {item.performances && item.performances.length > 0 && (
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              alignSelf: 'flex-end'
+            }}
+          >
+            <TextSemiBold
+              textStyle={{
+                color: GlobalStyles.brandPrimary,
+                textAlign: 'right'
+              }}
+            >
+              Hay nueva actuacion!!!
+            </TextSemiBold>
+          </View>
+        )}
         <TextSemiBold>
           Shipping:{' '}
           <TextSemiBold textStyle={{ color: GlobalStyles.brandPrimary }}>
@@ -96,6 +114,34 @@ export default function RestaurantsScreen({ navigation, route }) {
             >
               <MaterialCommunityIcons name="delete" color={'white'} size={20} />
               <TextRegular textStyle={styles.text}>Delete</TextRegular>
+            </View>
+          </Pressable>
+          <Pressable
+            onPress={() =>
+              navigation.navigate('CreatePerformanceScreen', { id: item.id })
+            }
+            style={({ pressed }) => [
+              {
+                backgroundColor: pressed
+                  ? GlobalStyles.brandGreenTap
+                  : GlobalStyles.brandGreen
+              },
+              styles.actionButton
+            ]}
+          >
+            <View
+              style={[
+                { flex: 1, flexDirection: 'row', justifyContent: 'center' }
+              ]}
+            >
+              <MaterialCommunityIcons
+                name="thumb-up"
+                color={'white'}
+                size={20}
+              />
+              <TextRegular textStyle={styles.text}>
+                Create Performance
+              </TextRegular>
             </View>
           </Pressable>
         </View>
@@ -235,7 +281,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     bottom: 5,
     position: 'absolute',
-    width: '90%'
+    width: '60%'
   },
   text: {
     fontSize: 16,
