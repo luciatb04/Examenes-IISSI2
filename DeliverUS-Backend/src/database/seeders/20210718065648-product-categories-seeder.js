@@ -9,14 +9,15 @@ module.exports = {
      *   isBetaMember: false
      * }], {})
     */
+
     await queryInterface.bulkInsert('ProductCategories',
       [
-        { name: 'Starters' },
-        { name: 'Sides' },
-        { name: 'Drinks' },
-        { name: 'Main Courses' },
-        { name: 'Desserts' },
-        { name: 'Sandwiches' }
+        { name: 'Starters', restaurantId: 1 },
+        { name: 'Sides', restaurantId: 1 },
+        { name: 'Drinks', restaurantId: 2 },
+        { name: 'Main Courses', restaurantId: 2 },
+        { name: 'Desserts', restaurantId: 2 },
+        { name: 'Sandwiches', restaurantId: 2 }
       ], {})
   },
 
@@ -27,7 +28,6 @@ module.exports = {
      * Example:
      * await queryInterface.bulkDelete('People', null, {})
      */
-
     const { sequelize } = queryInterface
     try {
       await sequelize.transaction(async (transaction) => {
